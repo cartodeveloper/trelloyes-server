@@ -1,5 +1,6 @@
 const express = require("express");
 const { v4: uuid } = require("uuid");
+const logger = require("../logger");
 const cardRouter = express.Router();
 const bodyParser = express.json();
 const cards = [
