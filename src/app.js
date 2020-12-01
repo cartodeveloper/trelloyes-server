@@ -52,13 +52,16 @@ app.use(function validateBearerToken(req, res, next) {
   // move to the next middleware
   next();
 });
+
+//GET/card
 app.get("/card", (req, res) => {
   res.json(cards);
 });
-
+//GET/list
 app.get("/list", (req, res) => {
   res.json(lists);
 });
+//GET/card/dinamic ID
 app.get("/card/:id", (req, res) => {
   const { id } = req.params;
   const card = cards.find((c) => c.id == id);
@@ -70,6 +73,8 @@ app.get("/card/:id", (req, res) => {
   }
 
   res.json(card);
+
+  //GET/list/dinamic ID
   app.get("/list/:id", (req, res) => {
     const { id } = req.params;
     const list = lists.find((li) => li.id == id);
@@ -83,6 +88,37 @@ app.get("/card/:id", (req, res) => {
     res.json(list);
   });
 });
+
+//POST/card
+app.post("/card", (res, req) => {
+  const { title, content } = req.body; //getting data from the body
+
+  if (!title) {
+    logger.error(`Title is required`);
+    return res.status(400).send("Invalid data"); //validating title exists
+  }
+
+  if (!content) {
+    logger.error(`Content is required`);
+    return res.status(400).send("Invalid data"); //validating content exists
+  }
+  // If they exists generate an ID and push a card object into the array.
+  const id = uuid();
+
+  const card = {
+    id,
+    title,
+    content,
+  };
+
+  cards.push(card);
+
+  // Log the card creation and send the res with location header.
+  logger.info(`Card with id ${id} created`);
+
+  res.status(201).location(`http://localhost:8000/card/${id}`).json(card);
+});
+
 app.use(function errorHandler(error, req, res, next) {
   let response;
   if (NODE_ENV === "production") {
