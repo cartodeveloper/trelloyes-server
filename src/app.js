@@ -1,4 +1,5 @@
 require("dotenv").config();
+const { v4: uuid } = require("uuid");
 const winston = require("winston");
 const express = require("express");
 const morgan = require("morgan");
@@ -7,6 +8,7 @@ const helmet = require("helmet");
 const { NODE_ENV } = require("./config");
 
 const app = express();
+
 const cards = [
   {
     id: 1,
@@ -38,6 +40,7 @@ if (NODE_ENV !== "production") {
 }
 app.use(morgan(morganOption));
 app.use(helmet());
+app.use(express.json());
 app.use(function validateBearerToken(req, res, next) {
   const apiToken = process.env.API_TOKEN;
   const authToken = req.get("Authorization");
