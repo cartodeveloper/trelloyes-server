@@ -1,21 +1,14 @@
 require("dotenv").config();
-const { v4: uuid } = require("uuid");
 const winston = require("winston");
 const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
 const helmet = require("helmet");
+const { v4: uuid } = require("uuid");
 const { NODE_ENV } = require("./config");
+const cardRouter = require("./card/card-router");
 
 const app = express();
-
-const cards = [
-  {
-    id: 1,
-    title: "Task One",
-    content: "This is card one",
-  },
-];
 const lists = [
   {
     id: 1,
@@ -40,7 +33,8 @@ if (NODE_ENV !== "production") {
 }
 app.use(morgan(morganOption));
 app.use(helmet());
-app.use(express.json());
+
+//Validation needs to be taking care BEFORE any routes get handled.
 app.use(function validateBearerToken(req, res, next) {
   const apiToken = process.env.API_TOKEN;
   const authToken = req.get("Authorization");
@@ -53,10 +47,8 @@ app.use(function validateBearerToken(req, res, next) {
   next();
 });
 
-//GET/card
-app.get("/card", (req, res) => {
-  res.json(cards);
-});
+app.use(cardRouter);
+
 //GET/list
 app.get("/list", (req, res) => {
   res.json(lists);
@@ -87,36 +79,6 @@ app.get("/card/:id", (req, res) => {
 
     res.json(list);
   });
-});
-
-//POST/card
-app.post("/card", (res, req) => {
-  const { title, content } = req.body; //getting data from the body
-
-  if (!title) {
-    logger.error(`Title is required`);
-    return res.status(400).send("Invalid data"); //validating title exists
-  }
-
-  if (!content) {
-    logger.error(`Content is required`);
-    return res.status(400).send("Invalid data"); //validating content exists
-  }
-  // If they exists generate an ID and push a card object into the array.
-  const id = uuid();
-
-  const card = {
-    id,
-    title,
-    content,
-  };
-
-  cards.push(card);
-
-  // Log the card creation and send the res with location header.
-  logger.info(`Card with id ${id} created`);
-
-  res.status(201).location(`http://localhost:8000/card/${id}`).json(card);
 });
 
 //POST/list
