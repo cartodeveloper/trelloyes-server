@@ -118,6 +118,8 @@ app.post("/card", (res, req) => {
 
   res.status(201).location(`http://localhost:8000/card/${id}`).json(card);
 });
+
+//POST/list
 app.post("/list", (req, res) => {
   const { header, cardIds = [] } = req.body;
 
@@ -156,6 +158,23 @@ app.post("/list", (req, res) => {
   logger.info(`List with id ${id} created`);
 
   res.status(201).location(`http://localhost:8000/list/${id}`).json({ id });
+});
+
+// DELETE/list
+app.delete("/list/:id", (req, res) => {
+  const { id } = req.params;
+
+  const listIndex = lists.findIndex((li) => li.id == id);
+
+  if (listIndex === -1) {
+    logger.error(`List with id ${id} not found.`);
+    return res.status(404).send("Not Found");
+  }
+
+  lists.splice(listIndex, 1);
+
+  logger.info(`List with id ${id} deleted.`);
+  res.status(204).end();
 });
 
 app.use(function errorHandler(error, req, res, next) {
